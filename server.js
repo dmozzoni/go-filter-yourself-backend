@@ -3,7 +3,7 @@
 var bodyParser = require('body-parser');
 var express = require('express');
 var path = require('path');
-var stormpath = require('express-stormpath');
+// var stormpath = require('express-stormpath');
 var mongoose = require('mongoose');
 
 
@@ -16,6 +16,8 @@ var app = express();
 var mongoURI =  process.env.MONGODB_URI || 'mongodb://localhost/beer_api';
 mongoose.connect(mongoURI);
 mongoose.Promise = global.Promise;
+
+console.log(mongoURI);
 
 // set up a variable to hold our model here...
 var Schema = require("./models/models");
@@ -37,32 +39,27 @@ app.set('trust proxy',true);
   // angular application.  We don't need to authenticate those requests, so we
   // setup this server before we initialize Stormpath.
 
-app.use('/',express.static(path.join(__dirname, '..', 'client'),{ redirect: false }));
+// app.use('/',express.static(path.join(__dirname, '..', 'client'),{ redirect: false }));
 
  // Now we initialize Stormpath, any middleware that is registered after this
  // point will be protected by Stormpath.
 
-console.log('Initializing Stormpath');
-
-app.use(stormpath.init(app, {
-  web: {
-    spa: {
-      enabled: true,
-      view: path.join(__dirname, '..', 'client','index.html')
-    },
-    me: {
-      expand: {
-        customData: true,
-        groups: true
-      }
-    }
-  }
-}));
-
-
-
-
-
+// console.log('Initializing Stormpath');
+//
+// app.use(stormpath.init(app, {
+//   web: {
+//     spa: {
+//       enabled: true,
+//       view: path.join(__dirname, '..', 'client','index.html')
+//     },
+//     me: {
+//       expand: {
+//         customData: true,
+//         groups: true
+//       }
+//     }
+//   }
+// }));
 
 
 
@@ -175,11 +172,6 @@ router.route('/filters/:filter_id')
 //
 //
 
-
-
-
-
-
   // more routes for our API will happen here
   router.route('/userprofiles')
 
@@ -267,21 +259,6 @@ router.route('/filters/:filter_id')
     });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // View all routes
 router.get("/routes", function(req, res){
   console.log(router.stack);
@@ -291,12 +268,10 @@ router.get("/routes", function(req, res){
 // all of our routes will be prefixed with /api
 app.use('/api', router);
 
-
-
-
-
-
-
+app.route('/*')
+  .get(function(req, res) {
+    res.json({message: "There's nothing to see here."});
+  });
 
 
 // Now that our static file server and Stormpath are configured, we let Express
@@ -305,19 +280,19 @@ app.use('/api', router);
 //  to define all view routes, and rediret to the home page if the URL is not
 //  defined.
 
-app.route('/*')
-  .get(function(req, res) {
-    res.sendFile(path.join(__dirname, '..', 'client','index.html'));
-  });
-
-app.post('/profile', bodyParser.json(), stormpath.loginRequired, require('./routes/profile'));
-
-
-// Start the web server.
-
-app.on('stormpath.ready',function () {
-  console.log('Stormpath Ready');
-});
+// app.route('/*')
+//   .get(function(req, res) {
+//     res.sendFile(path.join(__dirname, '..','gofilter', 'client','index.html'));
+//   });
+//
+// app.post('/profile', bodyParser.json(), stormpath.loginRequired, require('./routes/profile'));
+//
+//
+// // Start the web server.
+//
+// app.on('stormpath.ready',function () {
+//   console.log('Stormpath Ready');
+// });
 
 var port = process.env.PORT || 3000;
 app.listen(port, function () {
